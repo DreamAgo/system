@@ -50,7 +50,7 @@ public class LoginController extends BaseController {
         loginLog.setSystemBrowserInfo();
         this.loginLogService.saveLoginLog(loginLog);
 
-        return  ResultResponse.build().ok();
+        return  ResultResponse.build().ok().put("token",token);
     }
 
     @PostMapping("regist")

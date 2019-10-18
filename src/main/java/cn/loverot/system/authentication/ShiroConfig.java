@@ -1,5 +1,6 @@
 package cn.loverot.system.authentication;
 
+import cn.loverot.system.filter.ShiroLoginFilter;
 import cn.loverot.system.properties.HsProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.codec.Base64;
@@ -15,9 +16,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Base64Utils;
 
+import javax.servlet.Filter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Shiro 配置类
@@ -55,7 +58,10 @@ public class ShiroConfig {
 
         // 除上以外所有 url都必须认证通过才可以访问，未通过认证自动访问 LoginUrl
         filterChainDefinitionMap.put("/**", "user");
-
+        //获取filters
+        Map<String, Filter> filters = shiroFilterFactoryBean.getFilters();
+        //将自定义 的FormAuthenticationFilter注入shiroFilter中
+        filters.put("user", new ShiroLoginFilter());
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         return shiroFilterFactoryBean;
     }
