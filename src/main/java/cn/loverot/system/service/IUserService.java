@@ -1,6 +1,7 @@
 package cn.loverot.system.service;
 
 import cn.loverot.common.entity.QueryRequest;
+import cn.loverot.common.entity.ResultResponse;
 import cn.loverot.system.entity.User;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -109,4 +110,11 @@ public interface IUserService extends IService<User> {
      * @param user 个人信息
      */
     void updateProfile(User user);
+
+    /**
+     * 校验用户是否有效
+     * @param user
+     * @return
+     */
+    ResultResponse checkUserIsEffective(User user);
 }

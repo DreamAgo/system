@@ -1,4 +1,4 @@
-package cn.loverot.system.authentication;
+package cn.loverot.system.auth;
 
 import org.apache.shiro.session.Session;
 import org.apache.shiro.session.SessionListener;

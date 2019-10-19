@@ -152,6 +152,12 @@ public class User implements Serializable {
     private String isTab;
 
     /**
+     * 是否开启 tab 0开启，1关闭
+     */
+    @TableField("SALT")
+    private String salt;
+
+    /**
      * 描述
      */
     @TableField("DESCRIPTION")

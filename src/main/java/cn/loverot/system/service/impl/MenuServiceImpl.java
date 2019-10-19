@@ -1,6 +1,6 @@
 package cn.loverot.system.service.impl;
 
-import cn.loverot.system.authentication.ShiroRealm;
+import cn.loverot.system.auth.ShiroRealm;
 import cn.loverot.system.entity.Menu;
 import cn.loverot.system.entity.MenuTree;
 import cn.loverot.system.mapper.MenuMapper;

@@ -2,13 +2,15 @@ package cn.loverot.system.service.impl;
 
 import cn.hutool.crypto.SecureUtil;
 import cn.loverot.common.entity.QueryRequest;
-import cn.loverot.system.authentication.ShiroRealm;
+import cn.loverot.common.entity.ResultResponse;
+import cn.loverot.system.auth.ShiroRealm;
 import cn.loverot.system.constant.Const;
 import cn.loverot.system.entity.User;
 import cn.loverot.system.entity.UserRole;
 import cn.loverot.system.mapper.UserMapper;
 import cn.loverot.system.service.IUserRoleService;
 import cn.loverot.system.service.IUserService;
+import cn.loverot.system.utils.PasswordUtil;
 import cn.loverot.system.utils.SortUtil;
 import cn.loverot.system.utils.SystemUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -126,7 +128,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Transactional
     public void regist(String username, String password) {
         User user = new User();
-        user.setPassword(SecureUtil.sha1(password));
+        String salt = PasswordUtil.RandSalt();
+        user.setSalt(salt);
+        user.setPassword(PasswordUtil.encrypt(username,password,salt));
         user.setUsername(username);
         user.setCreateTime(new Date());
         user.setStatus(User.STATUS_VALID);
@@ -147,7 +151,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Transactional
     public void updatePassword(String username, String password) {
         User user = new User();
-        user.setPassword(SecureUtil.sha1(password));
+        String salt = PasswordUtil.RandSalt();
+        user.setPassword(PasswordUtil.encrypt(username,password,salt));
+        user.setSalt(salt);
         user.setModifyTime(new Date());
         this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
     }
@@ -178,6 +184,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setRoleId(null);
         user.setPassword(null);
         updateById(user);
+    }
+
+    @Override
+    public ResultResponse checkUserIsEffective(User user) {
+        if(Const.USER_LOCK_STATUS.equals(user.getStatus())){
+            ResultResponse.forbid().message("账号已被锁定!");
+        }
+        return ResultResponse.ok();
     }
 
     private void setUserRoles(User user, String[] roles) {

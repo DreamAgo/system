@@ -38,14 +38,14 @@ public class MenuController extends BaseController {
             throw new HsException("您无权获取别人的菜单");
         }
         MenuTree<Menu> userMenus = this.menuService.findUserMenus(username);
-        return ResultResponse.build().data(userMenus);
+        return ResultResponse.ok().data(userMenus);
     }
 
     @GetMapping("tree")
     @ControllerEndpoint(exceptionMessage = "获取菜单树失败")
     public ResultResponse getMenuTree(Menu menu) {
         MenuTree<Menu> menus = this.menuService.findMenus(menu);
-        return ResultResponse.build().ok().data(menus.getChilds());
+        return ResultResponse.ok().data(menus.getChilds());
     }
 
     @PostMapping
@@ -53,7 +53,7 @@ public class MenuController extends BaseController {
     @ControllerEndpoint(operation = "新增菜单/按钮", exceptionMessage = "新增菜单/按钮失败")
     public ResultResponse addMenu(@Valid Menu menu) {
         this.menuService.createMenu(menu);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @GetMapping("delete/{menuIds}")
@@ -61,7 +61,7 @@ public class MenuController extends BaseController {
     @ControllerEndpoint(operation = "删除菜单/按钮", exceptionMessage = "删除菜单/按钮失败")
     public ResultResponse deleteMenus(@NotBlank(message = "{required}") @PathVariable String menuIds) {
         this.menuService.deleteMeuns(menuIds);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @PostMapping("update")
@@ -69,7 +69,7 @@ public class MenuController extends BaseController {
     @ControllerEndpoint(operation = "修改菜单/按钮", exceptionMessage = "修改菜单/按钮失败")
     public ResultResponse updateMenu(@Valid Menu menu) {
         this.menuService.updateMenu(menu);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @GetMapping("excel")

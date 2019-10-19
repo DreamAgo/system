@@ -1,11 +1,14 @@
-package cn.loverot.system.authentication;
+package cn.loverot.system.auth;
 
+import cn.loverot.system.entity.JwtToken;
 import cn.loverot.system.entity.Menu;
 import cn.loverot.system.entity.Role;
 import cn.loverot.system.entity.User;
 import cn.loverot.system.service.IMenuService;
 import cn.loverot.system.service.IRoleService;
 import cn.loverot.system.service.IUserService;
+import cn.loverot.system.utils.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
  *
  * @author huise
  */
+@Slf4j
 @Component
 public class ShiroRealm extends AuthorizingRealm {
 
@@ -34,6 +38,14 @@ public class ShiroRealm extends AuthorizingRealm {
     private IRoleService roleService;
     @Autowired
     private IMenuService menuService;
+
+    /**
+     * 必须重写此方法，不然Shiro会报错
+     */
+    @Override
+    public boolean supports(AuthenticationToken token) {
+        return token instanceof JwtToken;
+    }
 
     /**
      * 授权模块，获取用户角色和权限
@@ -63,29 +75,33 @@ public class ShiroRealm extends AuthorizingRealm {
     /**
      * 用户认证
      *
-     * @param token AuthenticationToken 身份认证 token
+     * @param auth AuthenticationToken 身份认证 token
      * @return AuthenticationInfo 身份认证信息
      * @throws AuthenticationException 认证相关异常
      */
     @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-        // 获取用户输入的用户名和密码
-        String userName = (String) token.getPrincipal();
-        String password = new String((char[]) token.getCredentials());
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken auth) throws AuthenticationException {
+        String token = (String) auth.getCredentials();
+        if (StringUtils.isEmpty(token)) {
+            throw new AuthenticationException("token为空!");
+        }
+        // 解密获得username，用于和数据库进行对比
+        String userName = JwtUtil.getUsername(token);
+        if (StringUtils.isEmpty(userName)) {
+            throw new AuthenticationException("非法请求!");
+        }
 
         // 通过用户名到数据库查询用户信息
         User user = this.userService.findByName(userName);
 
         if (user == null) {
-            throw new UnknownAccountException("账号未注册！");
-        }
-        if (!StringUtils.equals(password, user.getPassword())) {
-            throw new IncorrectCredentialsException("用户名或密码错误！");
+            throw new UnknownAccountException("用户不存在!");
         }
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            throw new LockedAccountException("账号已被锁定,请联系管理员！");
+            throw new LockedAccountException("账号已被锁定,请联系管理员!");
         }
-        return new SimpleAuthenticationInfo(user, password, getName());
+        //TODO 验证token失效
+        return new SimpleAuthenticationInfo(user,token , getName());
     }
 
     /**

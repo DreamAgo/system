@@ -1,4 +1,4 @@
-package cn.loverot.system.authentication;
+package cn.loverot.system.auth;
 
 import cn.loverot.common.annotation.Helper;
 import org.apache.shiro.authz.AuthorizationInfo;

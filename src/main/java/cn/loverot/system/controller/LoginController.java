@@ -8,6 +8,8 @@ import cn.loverot.system.entity.LoginLog;
 import cn.loverot.system.entity.User;
 import cn.loverot.system.service.ILoginLogService;
 import cn.loverot.system.service.IUserService;
+import cn.loverot.system.utils.JwtUtil;
+import cn.loverot.system.utils.PasswordUtil;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -39,18 +41,27 @@ public class LoginController extends BaseController {
             @NotBlank(message = "{required}") String randCode,
             boolean rememberMe) throws HsException {
         if (!this.checkRandCode()) {
-            throw new HsException("验证码错误！");
+            throw new HsException("验证码错误!");
         }
-        password = SecureUtil.sha1(password);
-        UsernamePasswordToken token = new UsernamePasswordToken(username, password, rememberMe);
-        super.login(token);
+        User user = userService.findByName(username);
+        ResultResponse resultResponse = userService.checkUserIsEffective(user);
+        if(!resultResponse.isSuccess()){
+            return resultResponse;
+        }
+        //验证密码是否正确
+        String userPassword = user.getPassword();
+        String inPassword = PasswordUtil.encrypt(username, password, user.getSalt());
+        if(!userPassword.equals(inPassword)){
+            ResultResponse.fail().message("用户名或密码不正确!");
+        }
+        // 生成token
+        String token = JwtUtil.sign(username, userPassword);
         // 保存登录日志
         LoginLog loginLog = new LoginLog();
         loginLog.setUsername(username);
         loginLog.setSystemBrowserInfo();
         this.loginLogService.saveLoginLog(loginLog);
-
-        return  ResultResponse.build().ok().put("token",token);
+        return  ResultResponse.ok().put("token",token);
     }
 
     @PostMapping("regist")
@@ -62,7 +73,7 @@ public class LoginController extends BaseController {
             throw new HsException("该用户名已存在");
         }
         this.userService.regist(username, password);
-        return  ResultResponse.build().ok();
+        return  ResultResponse.ok();
     }
 
     @GetMapping("index/{username}")
@@ -84,7 +95,7 @@ public class LoginController extends BaseController {
         param.setUsername(username);
         List<Map<String, Object>> lastSevenUserVisitCount = this.loginLogService.findLastSevenDaysVisitCount(param);
         data.put("lastSevenUserVisitCount", lastSevenUserVisitCount);
-        return ResultResponse.build().ok().data(data);
+        return ResultResponse.ok().data(data);
     }
 
 }

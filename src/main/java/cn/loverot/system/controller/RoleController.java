@@ -33,14 +33,14 @@ public class RoleController extends BaseController {
 
     @GetMapping
     public ResultResponse getAllRoles(Role role) {
-        return  ResultResponse.build().ok().data(roleService.findRoles(role));
+        return  ResultResponse.ok().data(roleService.findRoles(role));
     }
 
     @GetMapping("list")
     @RequiresPermissions("role:view")
     public ResultResponse roleList(Role role, QueryRequest request) {
         Map<String, Object> dataTable = BasicUtil.getDataTable(this.roleService.findRoles(role, request));
-        return  ResultResponse.build().ok().data(dataTable);
+        return  ResultResponse.ok().data(dataTable);
     }
 
     @PostMapping
@@ -48,7 +48,7 @@ public class RoleController extends BaseController {
     @ControllerEndpoint(operation = "新增角色", exceptionMessage = "新增角色失败")
     public ResultResponse addRole(@Valid Role role) {
         this.roleService.createRole(role);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @GetMapping("delete/{roleIds}")
@@ -56,7 +56,7 @@ public class RoleController extends BaseController {
     @ControllerEndpoint(operation = "删除角色", exceptionMessage = "删除角色失败")
     public ResultResponse deleteRoles(@NotBlank(message = "{required}") @PathVariable String roleIds) {
         this.roleService.deleteRoles(roleIds);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @PostMapping("update")
@@ -64,7 +64,7 @@ public class RoleController extends BaseController {
     @ControllerEndpoint(operation = "修改角色", exceptionMessage = "修改角色失败")
     public ResultResponse updateRole(Role role) {
         this.roleService.updateRole(role);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @GetMapping("excel")

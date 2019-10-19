@@ -1,6 +1,6 @@
-package cn.loverot.system.authentication;
+package cn.loverot.system.auth;
 
-import cn.loverot.system.filter.ShiroLoginFilter;
+import cn.loverot.system.filter.JwtFilter;
 import cn.loverot.system.properties.HsProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.codec.Base64;
@@ -37,7 +37,6 @@ public class ShiroConfig {
     @Bean
     public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager) {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
-
         // 设置 securityManager
         shiroFilterFactoryBean.setSecurityManager(securityManager);
         // 登录的 url
@@ -53,15 +52,16 @@ public class ShiroConfig {
         for (String url : anonUrls) {
             filterChainDefinitionMap.put(url, "anon");
         }
+
         // 配置退出过滤器，其中具体的退出代码 Shiro已经替我们实现了
         filterChainDefinitionMap.put(hsProperties.getShiro().getLogoutUrl(), "logout");
-
         // 除上以外所有 url都必须认证通过才可以访问，未通过认证自动访问 LoginUrl
         filterChainDefinitionMap.put("/**", "user");
+
         //获取filters
         Map<String, Filter> filters = shiroFilterFactoryBean.getFilters();
-        //将自定义 的FormAuthenticationFilter注入shiroFilter中
-        filters.put("user", new ShiroLoginFilter());
+        //将自定义 的Filter注入shiroFilter中
+        filters.put("user", new JwtFilter());
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         return shiroFilterFactoryBean;
     }

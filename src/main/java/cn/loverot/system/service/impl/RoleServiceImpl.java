@@ -1,7 +1,7 @@
 package cn.loverot.system.service.impl;
 
 import cn.loverot.common.entity.QueryRequest;
-import cn.loverot.system.authentication.ShiroRealm;
+import cn.loverot.system.auth.ShiroRealm;
 import cn.loverot.system.constant.Const;
 import cn.loverot.system.entity.Role;
 import cn.loverot.system.entity.RoleMenu;

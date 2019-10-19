@@ -50,7 +50,7 @@ public class UserController extends BaseController {
     @RequiresPermissions("user:view")
     public ResultResponse userList(User user, QueryRequest request) {
         Map<String, Object> dataTable = getDataTable(this.userService.findUserDetail(user, request));
-        return ResultResponse.build().ok().data(dataTable);
+        return ResultResponse.ok().data(dataTable);
     }
 
     @PostMapping
@@ -58,7 +58,7 @@ public class UserController extends BaseController {
     @ControllerEndpoint(operation = "新增用户", exceptionMessage = "新增用户失败")
     public ResultResponse addUser(@Valid User user) {
         this.userService.createUser(user);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @GetMapping("delete/{userIds}")
@@ -67,7 +67,7 @@ public class UserController extends BaseController {
     public ResultResponse deleteUsers(@NotBlank(message = "{required}") @PathVariable String userIds) {
         String[] ids = userIds.split(StringPool.COMMA);
         this.userService.deleteUsers(ids);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @PostMapping("update")
@@ -78,7 +78,7 @@ public class UserController extends BaseController {
             throw new HsException("用户ID为空");
         }
         this.userService.updateUser(user);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @PostMapping("password/reset/{usernames}")
@@ -87,7 +87,7 @@ public class UserController extends BaseController {
     public ResultResponse resetPassword(@NotBlank(message = "{required}") @PathVariable String usernames) {
         String[] usernameArr = usernames.split(StringPool.COMMA);
         this.userService.resetPassword(usernameArr);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @PostMapping("password/update")
@@ -100,7 +100,7 @@ public class UserController extends BaseController {
             throw new HsException("原密码不正确");
         }
         userService.updatePassword(user.getUsername(), newPassword);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @GetMapping("avatar/{image}")
@@ -108,7 +108,7 @@ public class UserController extends BaseController {
     public ResultResponse updateAvatar(@NotBlank(message = "{required}") @PathVariable String image) {
         User user = getCurrentUser();
         this.userService.updateAvatar(user.getUsername(), image);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @PostMapping("theme/update")
@@ -116,7 +116,7 @@ public class UserController extends BaseController {
     public ResultResponse updateTheme(String theme, String isTab) {
         User user = getCurrentUser();
         this.userService.updateTheme(user.getUsername(), theme, isTab);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @PostMapping("profile/update")
@@ -125,7 +125,7 @@ public class UserController extends BaseController {
         User currentUser = getCurrentUser();
         user.setUserId(currentUser.getUserId());
         this.userService.updateProfile(user);
-        return ResultResponse.build().ok();
+        return ResultResponse.ok();
     }
 
     @GetMapping("excel")

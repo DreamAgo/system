@@ -2,7 +2,7 @@ package cn.loverot.system.controller;
 
 import cn.hutool.core.date.DateUtil;
 import cn.loverot.basic.utils.BasicUtil;
-import cn.loverot.system.authentication.ShiroHelper;
+import cn.loverot.system.auth.ShiroHelper;
 import cn.loverot.system.entity.User;
 import cn.loverot.system.service.IUserService;
 import cn.loverot.system.utils.SystemUtil;
