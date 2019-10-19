@@ -1,17 +1,24 @@
 package cn.loverot.system.filter;
 
+import cn.loverot.common.entity.ResultResponse;
 import cn.loverot.system.constant.Const;
 import cn.loverot.system.entity.JwtToken;
+import cn.loverot.system.service.IUserService;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * @Description: 鉴权登录拦截器
@@ -19,8 +26,8 @@ import javax.servlet.http.HttpServletResponse;
  * @Date: 2019/10/19
  **/
 @Slf4j
+@Component
 public class JwtFilter extends BasicHttpAuthenticationFilter {
-
 	/**
 	 * 执行登录认证
 	 *
@@ -35,7 +42,16 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
 			executeLogin(request, response);
 			return true;
 		} catch (Exception e) {
-			throw new AuthenticationException("Token失效，请重新登录", e);
+			//解决后台报错
+			PrintWriter writer =null;
+			try {
+				response.setContentType("text/html;charset=utf-8");
+				writer = response.getWriter();
+				writer.write(JSON.toJSONString(ResultResponse.unAuth().message(e.getMessage())));
+			} catch (IOException e1) {
+				writer.write(JSON.toJSONString(ResultResponse.fail().message(e.getMessage())));
+			}
+			return false;
 		}
 	}
 
@@ -46,7 +62,6 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
 	protected boolean executeLogin(ServletRequest request, ServletResponse response) throws Exception {
 		HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 		String token = httpServletRequest.getHeader(Const.X_ACCESS_TOKEN);
-
 		JwtToken jwtToken = new JwtToken(token);
 		// 提交给realm进行登入，如果错误他会抛出异常并被捕获
 		getSubject(request, response).login(jwtToken);
