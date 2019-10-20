@@ -187,7 +187,4 @@ public class User implements Serializable {
     @TableField(exist = false)
     private String roleName;
 
-    public Long getId() {
-        return userId;
-    }
 }

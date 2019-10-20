@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -90,6 +91,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     @Transactional
+    @CacheEvict(value = {CacheConstant.SYS_USERS_CACHE}, allEntries = true)
     public void deleteUsers(String[] userIds) {
         List<String> list = Arrays.asList(userIds);
         // 删除用户
@@ -100,6 +102,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     @Transactional
+    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
     public void updateUser(User user) {
         // 更新用户
         user.setPassword(null);
@@ -119,6 +122,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     @Transactional
+    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
     public void resetPassword(String[] usernames) {
         Arrays.stream(usernames).forEach(username -> {
             User user = new User();
@@ -152,6 +156,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     @Transactional
+    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
     public void updatePassword(String username, String password) {
         User user = new User();
         String salt = PasswordUtil.RandSalt();
@@ -163,6 +168,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     @Transactional
+    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
     public void updateAvatar(String username, String avatar) {
         User user = new User();
         user.setAvatar(avatar);
@@ -172,6 +178,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     @Transactional
+    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
     public void updateTheme(String username, String theme, String isTab) {
         User user = new User();
         user.setTheme(theme);
@@ -182,6 +189,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     @Transactional
+    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
     public void updateProfile(User user) {
         user.setUsername(null);
         user.setRoleId(null);

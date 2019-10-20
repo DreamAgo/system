@@ -37,10 +37,13 @@ import java.util.stream.Collectors;
 public class ShiroRealm extends AuthorizingRealm {
 
     @Autowired
+    @Lazy
     private IUserService userService;
     @Autowired
+    @Lazy
     private IRoleService roleService;
     @Autowired
+    @Lazy
     private IMenuService menuService;
     @Autowired
     @Lazy
