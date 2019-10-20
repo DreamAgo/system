@@ -23,7 +23,7 @@ public class HsProperties {
 
         private long sessionTimeout=3600;
         private int cookieTimeout=86400;
-        private String anonUrl="/img/**,/layui/**,/json/**,/code,/regist,/login";
+        private String anonUrl="/img/**,/layui/**,/json/**,/code,/regist,/login,/hslib/**";
         private String loginUrl="/login";
         private String successUrl="/index";
         private String logoutUrl="/logout";
