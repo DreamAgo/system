@@ -2,8 +2,10 @@ package cn.loverot.system.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.loverot.basic.utils.RedisUtil;
 import cn.loverot.common.entity.ResultResponse;
 import cn.loverot.common.exception.HsException;
+import cn.loverot.system.constant.CacheConstant;
 import cn.loverot.system.entity.LoginLog;
 import cn.loverot.system.entity.User;
 import cn.loverot.system.service.ILoginLogService;
@@ -11,17 +13,27 @@ import cn.loverot.system.service.IUserService;
 import cn.loverot.system.utils.JwtUtil;
 import cn.loverot.system.utils.PasswordUtil;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
+import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author huise
@@ -34,15 +46,61 @@ public class LoginController extends BaseController {
     private IUserService userService;
     @Autowired
     private ILoginLogService loginLogService;
-    @PostMapping("login")
+
+    @RequestMapping(value = "/index", method = RequestMethod.GET)
+    public List<Map> index(HttpServletRequest request) {
+        ServletContext servletContext = request.getSession().getServletContext();
+        if (servletContext == null) {
+            return null;
+        }
+        WebApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+
+        //请求url和处理方法的映射
+        List<Map> requestToMethodItemList = new ArrayList<Map>();
+        //获取所有的RequestMapping
+        Map<String, HandlerMapping> allRequestMappings = BeanFactoryUtils.beansOfTypeIncludingAncestors(appContext,
+                HandlerMapping.class, true, false);
+
+        for (HandlerMapping handlerMapping : allRequestMappings.values()) {
+            //本项目只需要RequestMappingHandlerMapping中的URL映射
+            if (handlerMapping instanceof RequestMappingHandlerMapping) {
+                RequestMappingHandlerMapping requestMappingHandlerMapping = (RequestMappingHandlerMapping) handlerMapping;
+                Map<RequestMappingInfo, HandlerMethod> handlerMethods = requestMappingHandlerMapping.getHandlerMethods();
+                for (Map.Entry<RequestMappingInfo, HandlerMethod> requestMappingInfoHandlerMethodEntry : handlerMethods.entrySet()) {
+                    RequestMappingInfo requestMappingInfo = requestMappingInfoHandlerMethodEntry.getKey();
+                    HandlerMethod mappingInfoValue = requestMappingInfoHandlerMethodEntry.getValue();
+
+                    RequestMethodsRequestCondition methodCondition = requestMappingInfo.getMethodsCondition();
+                    String requestType = methodCondition.getMethods().stream().map(vo -> String.valueOf(vo)).collect(Collectors.joining(","));
+
+
+                    PatternsRequestCondition patternsCondition = requestMappingInfo.getPatternsCondition();
+                    //  String requestUrl = SetUtils.first(patternsCondition.getPatterns());
+                    String requestUrl = patternsCondition.getPatterns().stream().map(vo -> String.valueOf(vo)).collect(Collectors.joining(","));
+                    ;
+                    String controllerName = mappingInfoValue.getBeanType().toString();
+                    String requestMethodName = mappingInfoValue.getMethod().getName();
+                    Class<?>[] methodParamTypes = mappingInfoValue.getMethod().getParameterTypes();
+                    Map item = new HashMap();
+                    item.put("requestUrl",requestUrl);
+                    //item.put("controllerName",controllerName);
+                   // item.put("requestMethodName",requestMethodName);
+                   // item.put("methodParamTypes",methodParamTypes);
+                    requestToMethodItemList.add(item);
+                }
+            }
+        }
+        return requestToMethodItemList;
+    }
+        @PostMapping("login")
     public ResultResponse login(
             @NotBlank(message = "{required}") String username,
             @NotBlank(message = "{required}") String password,
             @NotBlank(message = "{required}") String randCode,
             boolean rememberMe) throws HsException {
-        if (!this.checkRandCode()) {
-            throw new HsException("验证码错误!");
-        }
+//        if (!this.checkRandCode()) {
+//            throw new HsException("验证码错误!");
+//        }
         User user = userService.findByName(username);
         ResultResponse resultResponse = userService.checkUserIsEffective(user);
         if(!resultResponse.isSuccess()){
@@ -56,6 +114,8 @@ public class LoginController extends BaseController {
         }
         // 生成token
         String token = JwtUtil.sign(username, userPassword);
+        // 设置token缓存有效时间
+        PasswordUtil.setSessionExpire(token,token);
         // 保存登录日志
         LoginLog loginLog = new LoginLog();
         loginLog.setUsername(username);

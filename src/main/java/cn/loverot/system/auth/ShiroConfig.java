@@ -2,18 +2,24 @@ package cn.loverot.system.auth;
 
 import cn.loverot.system.filter.JwtFilter;
 import cn.loverot.system.properties.HsProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.codec.Base64;
+import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
+import org.apache.shiro.mgt.DefaultSubjectDAO;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.CookieRememberMeManager;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.servlet.SimpleCookie;
+import org.crazycake.shiro.RedisManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.crazycake.shiro.RedisCacheManager;
 import org.springframework.util.Base64Utils;
 
 import javax.servlet.Filter;
@@ -29,10 +35,14 @@ import java.util.Map;
  */
 @Configuration
 @EnableConfigurationProperties(HsProperties.class)
+@Slf4j
 public class ShiroConfig {
 
     @Autowired
     private HsProperties hsProperties;
+
+    @Autowired
+    private RedisProperties redisProperties;
 
     @Bean
     public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager) {
@@ -66,16 +76,6 @@ public class ShiroConfig {
         return shiroFilterFactoryBean;
     }
 
-    @Bean
-    public SecurityManager securityManager(ShiroRealm shiroRealm) {
-        DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
-        // 配置 SecurityManager，并注入 shiroRealm
-        securityManager.setRealm(shiroRealm);
-        // 配置 rememberMeCookie
-        securityManager.setRememberMeManager(rememberMeManager());
-        return securityManager;
-    }
-
     /**
      * rememberMe cookie 效果是重开浏览器后无需重新登录
      *
@@ -89,6 +89,42 @@ public class ShiroConfig {
         return cookie;
     }
 
+    /**
+     * cacheManager 缓存 redis实现
+     * 使用的是shiro-redis开源插件
+     *
+     * @return
+     */
+    public RedisCacheManager redisCacheManager() {
+        log.info("===============(1)创建缓存管理器RedisCacheManager");
+        RedisCacheManager redisCacheManager = new RedisCacheManager();
+        redisCacheManager.setRedisManager(redisManager());
+        //redis中针对不同用户缓存(此处的id需要对应user实体中的id字段,用于唯一标识)
+        redisCacheManager.setPrincipalIdFieldName("id");
+        //用户权限信息缓存时间
+        redisCacheManager.setExpire(200000);
+        return redisCacheManager;
+    }
+    @Bean("securityManager")
+    public DefaultWebSecurityManager securityManager(ShiroRealm shiroRealm) {
+        DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
+        securityManager.setRealm(shiroRealm);
+        // 配置 rememberMeCookie
+        securityManager.setRememberMeManager(rememberMeManager());
+        /*
+         * 关闭shiro自带的session，详情见文档
+         * http://shiro.apache.org/session-management.html#SessionManagement-
+         * StatelessApplications%28Sessionless%29
+         */
+        DefaultSubjectDAO subjectDAO = new DefaultSubjectDAO();
+        DefaultSessionStorageEvaluator defaultSessionStorageEvaluator = new DefaultSessionStorageEvaluator();
+        defaultSessionStorageEvaluator.setSessionStorageEnabled(false);
+        subjectDAO.setSessionStorageEvaluator(defaultSessionStorageEvaluator);
+        securityManager.setSubjectDAO(subjectDAO);
+        //自定义缓存实现,使用redis
+        securityManager.setCacheManager(redisCacheManager());
+        return securityManager;
+    }
     /**
      * cookie管理对象
      *
@@ -110,6 +146,22 @@ public class ShiroConfig {
         AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
         authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);
         return authorizationAttributeSourceAdvisor;
+    }
+    /**
+     * 配置shiro redisManager
+     * 使用的是shiro-redis开源插件
+     *
+     * @return
+     */
+    @Bean
+    public RedisManager redisManager() {
+        log.info("===============(2)创建RedisManager,连接Redis..URL= " + redisProperties.getHost() + ":" + redisProperties.getPort());
+        RedisManager redisManager = new RedisManager();
+        redisManager.setHost(redisProperties.getHost() + ":" + redisProperties.getPort());
+        if (!org.springframework.util.StringUtils.isEmpty(redisProperties.getPassword())) {
+            redisManager.setPassword(redisProperties.getPassword());
+        }
+        return redisManager;
     }
 
 }

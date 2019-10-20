@@ -4,6 +4,7 @@ import cn.hutool.crypto.SecureUtil;
 import cn.loverot.common.entity.QueryRequest;
 import cn.loverot.common.entity.ResultResponse;
 import cn.loverot.system.auth.ShiroRealm;
+import cn.loverot.system.constant.CacheConstant;
 import cn.loverot.system.constant.Const;
 import cn.loverot.system.entity.User;
 import cn.loverot.system.entity.UserRole;
@@ -21,6 +22,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +45,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private ShiroRealm shiroRealm;
 
     @Override
+    @Cacheable(cacheNames= CacheConstant.SYS_USERS_CACHE, key="#username")
     public User findByName(String username) {
         return this.baseMapper.findByName(username);
     }
