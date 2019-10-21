@@ -13,6 +13,7 @@ import cn.loverot.system.service.IUserService;
 import cn.loverot.system.utils.JwtUtil;
 import cn.loverot.system.utils.PasswordUtil;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.AuthorizationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -65,7 +66,7 @@ public class LoginController extends BaseController {
         String userPassword = user.getPassword();
         String inPassword = PasswordUtil.encrypt(username, password, user.getSalt());
         if(!userPassword.equals(inPassword)){
-            ResultResponse.fail().message("用户名或密码不正确!");
+            throw new AuthorizationException("用户名或密码不正确!");
         }
         // 生成token
         String token = JwtUtil.sign(username, userPassword);
