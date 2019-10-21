@@ -19,19 +19,19 @@ import java.util.List;
 public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> implements IRoleMenuService {
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void deleteRoleMenusByRoleId(List<String> roleIds) {
         this.baseMapper.delete(new QueryWrapper<RoleMenu>().lambda().in(RoleMenu::getRoleId, roleIds));
     }
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void deleteRoleMenusByMenuId(List<String> menuIds) {
         this.baseMapper.delete(new QueryWrapper<RoleMenu>().lambda().in(RoleMenu::getRoleId, menuIds));
     }
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void deleteRoleMenus(String menuId) {
         this.baseMapper.deleteRoleMenus(menuId);
     }

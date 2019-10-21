@@ -49,7 +49,7 @@ public class LoginLogServiceImpl extends ServiceImpl<LoginLogMapper, LoginLog> i
     }
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void saveLoginLog(LoginLog loginLog) {
         loginLog.setLoginTime(new Date());
         String ip = BasicUtil.getIpAddr();
@@ -59,7 +59,7 @@ public class LoginLogServiceImpl extends ServiceImpl<LoginLogMapper, LoginLog> i
     }
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void deleteLoginLogs(String[] ids) {
         List<String> list = Arrays.asList(ids);
         baseMapper.deleteBatchIds(list);

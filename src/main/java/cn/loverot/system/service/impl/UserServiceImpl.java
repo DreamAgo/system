@@ -42,11 +42,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Autowired
     private IUserRoleService userRoleService;
-    @Autowired
-    private ShiroRealm shiroRealm;
 
     @Override
-    @Cacheable(cacheNames= CacheConstant.SYS_USERS_CACHE, key="#username")
+    @Cacheable(cacheNames = CacheConstant.SYS_USERS_CACHE, key = "#username", unless = "#result == null")
     public User findByName(String username) {
         return this.baseMapper.findByName(username);
     }
@@ -67,7 +65,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateLoginTime(String username) {
         User user = new User();
         user.setLastLoginTime(new Date());
@@ -75,7 +73,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void createUser(User user) {
         user.setCreateTime(new Date());
         user.setStatus(User.STATUS_VALID);
@@ -90,7 +88,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {CacheConstant.SYS_USERS_CACHE}, allEntries = true)
     public void deleteUsers(String[] userIds) {
         List<String> list = Arrays.asList(userIds);
@@ -101,8 +99,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
-    @Transactional
-    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CacheConstant.SYS_USERS_CACHE}, allEntries = true)
     public void updateUser(User user) {
         // 更新用户
         user.setPassword(null);
@@ -110,34 +108,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setModifyTime(new Date());
         updateById(user);
         // 更新关联角色
-        this.userRoleService.remove(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, user.getUserId()));
+        this.userRoleService.remove(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, user.getId()));
         String[] roles = user.getRoleId().split(StringPool.COMMA);
         setUserRoles(user, roles);
 
-        User currentUser = SystemUtil.getCurrentUser();
-        if (StringUtils.equalsIgnoreCase(currentUser.getUsername(), user.getUsername())) {
-            shiroRealm.clearCache();
-        }
+
     }
 
     @Override
-    @Transactional
-    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CacheConstant.SYS_USERS_CACHE}, allEntries = true)
     public void resetPassword(String[] usernames) {
         Arrays.stream(usernames).forEach(username -> {
             User user = new User();
-            user.setPassword(SecureUtil.sha1( User.DEFAULT_PASSWORD));
+            user.setPassword(SecureUtil.sha1(User.DEFAULT_PASSWORD));
             this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
         });
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void regist(String username, String password) {
         User user = new User();
         String salt = PasswordUtil.RandSalt();
         user.setSalt(salt);
-        user.setPassword(PasswordUtil.encrypt(username,password,salt));
+        user.setPassword(PasswordUtil.encrypt(username, password, salt));
         user.setUsername(username);
         user.setCreateTime(new Date());
         user.setStatus(User.STATUS_VALID);
@@ -149,26 +144,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         this.save(user);
 
         UserRole ur = new UserRole();
-        ur.setUserId(user.getUserId());
-        ur.setRoleId(2L); // 注册用户角色 ID
+        ur.setUserId(user.getId());
+        // 注册用户角色 ID
+        ur.setRoleId(2L);
         this.userRoleService.save(ur);
     }
 
     @Override
-    @Transactional
-    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CacheConstant.SYS_USERS_CACHE}, allEntries = true)
     public void updatePassword(String username, String password) {
         User user = new User();
         String salt = PasswordUtil.RandSalt();
-        user.setPassword(PasswordUtil.encrypt(username,password,salt));
+        user.setPassword(PasswordUtil.encrypt(username, password, salt));
         user.setSalt(salt);
         user.setModifyTime(new Date());
         this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
     }
 
     @Override
-    @Transactional
-    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CacheConstant.SYS_USERS_CACHE}, allEntries = true)
     public void updateAvatar(String username, String avatar) {
         User user = new User();
         user.setAvatar(avatar);
@@ -177,8 +173,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
-    @Transactional
-    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CacheConstant.SYS_USERS_CACHE}, allEntries = true)
     public void updateTheme(String username, String theme, String isTab) {
         User user = new User();
         user.setTheme(theme);
@@ -188,8 +184,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
-    @Transactional
-    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CacheConstant.SYS_USERS_CACHE}, allEntries = true)
     public void updateProfile(User user) {
         user.setUsername(null);
         user.setRoleId(null);
@@ -199,7 +195,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public ResultResponse checkUserIsEffective(User user) {
-        if(Const.USER_LOCK_STATUS.equals(user.getStatus())){
+        if (Const.USER_LOCK_STATUS.equals(user.getStatus())) {
             ResultResponse.forbid().message("账号已被锁定!");
         }
         return ResultResponse.ok();
@@ -209,7 +205,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         List<UserRole> userRoles = new ArrayList<>();
         Arrays.stream(roles).forEach(roleId -> {
             UserRole ur = new UserRole();
-            ur.setUserId(user.getUserId());
+            ur.setUserId(user.getId());
             ur.setRoleId(Long.valueOf(roleId));
             userRoles.add(ur);
         });

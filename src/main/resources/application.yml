@@ -2,11 +2,11 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/system?autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true
     username: root
-    password: 19980312a.
+    password: 123456
     filters: wall,mergeStat
     type: com.alibaba.druid.pool.DruidDataSource
   redis:
-    password: foobared
+    password: 123456
   aop:
     auto: true
 logging:

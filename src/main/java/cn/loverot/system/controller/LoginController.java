@@ -12,8 +12,10 @@ import cn.loverot.system.service.ILoginLogService;
 import cn.loverot.system.service.IUserService;
 import cn.loverot.system.utils.JwtUtil;
 import cn.loverot.system.utils.PasswordUtil;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -29,6 +31,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,6 +61,9 @@ public class LoginController extends BaseController {
 //            throw new HsException("验证码错误!");
 //        }
         User user = userService.findByName(username);
+        if(ObjectUtil.isNull(user)){
+            throw new AuthorizationException("用户名不存在!");
+        }
         ResultResponse resultResponse = userService.checkUserIsEffective(user);
         if(!resultResponse.isSuccess()){
             return resultResponse;
@@ -112,6 +118,18 @@ public class LoginController extends BaseController {
         List<Map<String, Object>> lastSevenUserVisitCount = this.loginLogService.findLastSevenDaysVisitCount(param);
         data.put("lastSevenUserVisitCount", lastSevenUserVisitCount);
         return ResultResponse.ok().data(data);
+    }
+    /**
+     * 退出登录
+     * @return
+     */
+    @RequestMapping(value = "/logout")
+    public ResultResponse logout(HttpServletRequest request, HttpServletResponse response) {
+        //用户退出逻辑
+        super.logout();
+        //清空用户Token缓存
+        PasswordUtil.delToken();
+        return ResultResponse.ok().message("退出登录成功！");
     }
 
 }

@@ -65,7 +65,7 @@ public class LogServiceImpl extends ServiceImpl<LogMapper, SystemLog> implements
     }
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void deleteLogs(String[] logIds) {
         List<String> list = Arrays.asList(logIds);
         baseMapper.deleteBatchIds(list);

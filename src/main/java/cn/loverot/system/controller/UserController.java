@@ -5,8 +5,10 @@ import cn.loverot.common.annotation.ControllerEndpoint;
 import cn.loverot.common.entity.QueryRequest;
 import cn.loverot.common.entity.ResultResponse;
 import cn.loverot.common.exception.HsException;
+import cn.loverot.system.auth.ShiroRealm;
 import cn.loverot.system.entity.User;
 import cn.loverot.system.service.IUserService;
+import cn.loverot.system.utils.SystemUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.wuwenze.poi.ExcelKit;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +37,14 @@ public class UserController extends BaseController {
 
     @Autowired
     private IUserService userService;
+    @Autowired
+    private ShiroRealm shiroRealm;
 
-    @GetMapping("{username}")
-    public User getUser(@NotBlank(message = "{required}") @PathVariable String username) {
-        return this.userService.findUserDetail(username);
+    @GetMapping("info")
+    public ResultResponse getUser() {
+        User currentUser = getCurrentUser();
+        User userDetail = this.userService.findUserDetail(currentUser.getUsername());
+        return ResultResponse.ok().data(userDetail);
     }
 
     @GetMapping("check/{username}")
@@ -74,10 +80,13 @@ public class UserController extends BaseController {
     @RequiresPermissions("user:update")
     @ControllerEndpoint(operation = "修改用户", exceptionMessage = "修改用户失败")
     public ResultResponse updateUser(@Valid User user) {
-        if (user.getUserId() == null) {
+        if (user.getId() == null) {
             throw new HsException("用户ID为空");
         }
         this.userService.updateUser(user);
+        if (StringUtils.equalsIgnoreCase(getCurrentUser().getUsername(), user.getUsername())) {
+            shiroRealm.clearCache();
+        }
         return ResultResponse.ok();
     }
 
@@ -123,7 +132,7 @@ public class UserController extends BaseController {
     @ControllerEndpoint(exceptionMessage = "修改个人信息失败")
     public ResultResponse updateProfile(User user) throws HsException {
         User currentUser = getCurrentUser();
-        user.setUserId(currentUser.getUserId());
+        user.setId(currentUser.getId());
         this.userService.updateProfile(user);
         return ResultResponse.ok();
     }

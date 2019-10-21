@@ -483,7 +483,7 @@ INSERT INTO `t_role_menu` VALUES ('2', '169');
 -- ----------------------------
 DROP TABLE IF EXISTS `t_user`;
 CREATE TABLE `t_user` (
-  `USER_ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '用户ID',
   `USERNAME` varchar(50) NOT NULL COMMENT '用户名',
   `PASSWORD` varchar(128) NOT NULL COMMENT '密码',
   `DEPT_ID` bigint(20) DEFAULT NULL COMMENT '部门ID',
@@ -499,7 +499,7 @@ CREATE TABLE `t_user` (
   `AVATAR` varchar(100) DEFAULT NULL COMMENT '头像',
   `DESCRIPTION` varchar(100) DEFAULT NULL COMMENT '描述',
   `SALT` varchar(8) DEFAULT NULL COMMENT '盐',
-  PRIMARY KEY (`USER_ID`) USING BTREE
+  PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='用户表';
 
 -- ----------------------------

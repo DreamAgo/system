@@ -68,7 +68,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
     }
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void createMenu(Menu menu) {
         menu.setCreateTime(new Date());
         this.setMenu(menu);
@@ -77,7 +77,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
 
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void updateMenu(Menu menu) {
         menu.setModifyTime(new Date());
         this.setMenu(menu);
@@ -87,7 +87,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
     }
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void deleteMeuns(String menuIds) {
         String[] menuIdsArray = menuIds.split(StringPool.COMMA);
         this.delete(Arrays.asList(menuIdsArray));

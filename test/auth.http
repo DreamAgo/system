@@ -1,0 +1,21 @@
+### 验证码
+POST {{host}}/code
+
+###
+
+### 登录请求
+POST {{host}}/login?username={{username}}&password={{password}}&randCode=ss
+Content-Type: application/x-www-form-urlencoded
+
+> {% client.global.set("auth_token", response.body.token); %}
+
+### 获取菜单数据
+GET {{host}}/menu/{{username}}
+X-Access-Token: {{auth_token}}
+
+###
+### 获取用户数据
+GET {{host}}/user/info
+X-Access-Token: {{auth_token}}
+
+###

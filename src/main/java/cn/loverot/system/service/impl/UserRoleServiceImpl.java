@@ -19,13 +19,13 @@ import java.util.List;
 public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> implements IUserRoleService {
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void deleteUserRolesByRoleId(List<String> roleIds) {
         this.baseMapper.delete(new QueryWrapper<UserRole>().lambda().in(UserRole::getRoleId, roleIds));
     }
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void deleteUserRolesByUserId(List<String> userIds) {
         this.baseMapper.delete(new QueryWrapper<UserRole>().lambda().in(UserRole::getUserId, userIds));
     }

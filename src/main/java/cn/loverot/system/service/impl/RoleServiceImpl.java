@@ -67,7 +67,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
     }
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void createRole(Role role) {
         role.setCreateTime(new Date());
         this.baseMapper.insert(role);
@@ -75,7 +75,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
     }
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void updateRole(Role role) {
         role.setModifyTime(new Date());
         this.updateById(role);
@@ -88,7 +88,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
     }
 
     @Override
-    @Transactional
+   @Transactional(rollbackFor = Exception.class)
     public void deleteRoles(String roleIds) {
         List<String> list = Arrays.asList(roleIds.split(StringPool.COMMA));
         this.baseMapper.delete(new QueryWrapper<Role>().lambda().in(Role::getRoleId, list));

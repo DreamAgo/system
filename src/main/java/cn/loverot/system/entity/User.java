@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wuwenze.poi.annotation.Excel;
 import com.wuwenze.poi.annotation.ExcelField;
 import lombok.Data;
@@ -55,8 +57,8 @@ public class User implements Serializable {
     /**
      * 用户 ID
      */
-    @TableId(value = "USER_ID", type = IdType.AUTO)
-    private Long userId;
+    @TableId(value = "ID", type = IdType.AUTO)
+    private Long Id;
 
     /**
      * 用户名
@@ -70,13 +72,9 @@ public class User implements Serializable {
      * 密码
      */
     @TableField("PASSWORD")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String password;
 
-    /**
-     * 部门 ID
-     */
-    @TableField("DEPT_ID")
-    private Long deptId;
 
     /**
      * 邮箱
@@ -128,7 +126,7 @@ public class User implements Serializable {
     /**
      * 性别 0男 1女 2 保密
      */
-    @TableField("SSEX")
+    @TableField("SEX")
     @NotBlank(message = "{required}")
     @ExcelField(value = "性别", writeConverterExp = "0=男,1=女,2=保密")
     private String sex;
@@ -165,12 +163,6 @@ public class User implements Serializable {
     @ExcelField(value = "个人描述")
     private String description;
 
-    /**
-     * 部门名称
-     */
-    @ExcelField(value = "部门")
-    @TableField(exist = false)
-    private String deptName;
 
     @TableField(exist = false)
     private String createTimeFrom;

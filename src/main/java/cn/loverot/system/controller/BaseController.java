@@ -30,4 +30,7 @@ public class BaseController extends cn.loverot.basic.controller.BaseController {
     protected void login(AuthenticationToken token) {
         getSubject().login(token);
     }
+    protected void logout() {
+        getSubject().logout();
+    }
 }
