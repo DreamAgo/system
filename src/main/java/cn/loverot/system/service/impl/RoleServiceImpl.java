@@ -57,7 +57,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
     @Override
     public IPage<Role> findRoles(Role role, QueryRequest request) {
         Page<Role> page = new Page<>(request.getPageNum(), request.getPageSize());
-        SortUtil.handlePageSort(request, page, "createTime", Const.ORDER_DESC, false);
+        SortUtil.handlePageSort(request, page, "create_time", Const.ORDER_ASC, false);
         return this.baseMapper.findRolePage(page, role);
     }
 
@@ -77,13 +77,13 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
     @Override
    @Transactional(rollbackFor = Exception.class)
     public void updateRole(Role role) {
-        role.setModifyTime(new Date());
+        role.setUpdateTime(new Date());
         this.updateById(role);
         List<String> roleIdList = new ArrayList<>();
-        roleIdList.add(String.valueOf(role.getRoleId()));
+        roleIdList.add(String.valueOf(role.getId()));
         this.roleMenuService.deleteRoleMenusByRoleId(roleIdList);
         saveRoleMenus(role);
-
+        //TODO 可能清理失效，需要确定能否清理角色
         shiroRealm.clearCache();
     }
 
@@ -91,7 +91,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
    @Transactional(rollbackFor = Exception.class)
     public void deleteRoles(String roleIds) {
         List<String> list = Arrays.asList(roleIds.split(StringPool.COMMA));
-        this.baseMapper.delete(new QueryWrapper<Role>().lambda().in(Role::getRoleId, list));
+        this.baseMapper.delete(new QueryWrapper<Role>().lambda().in(Role::getId, list));
 
         this.roleMenuService.deleteRoleMenusByRoleId(list);
         this.userRoleService.deleteUserRolesByRoleId(list);
@@ -104,7 +104,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
             Arrays.stream(menuIds).forEach(menuId -> {
                 RoleMenu roleMenu = new RoleMenu();
                 roleMenu.setMenuId(Long.valueOf(menuId));
-                roleMenu.setRoleId(role.getRoleId());
+                roleMenu.setRoleId(role.getId());
                 roleMenus.add(roleMenu);
             });
             roleMenuService.saveBatch(roleMenus);

@@ -43,7 +43,7 @@ public class RoleController extends BaseController {
         return  ResultResponse.ok().data(dataTable);
     }
 
-    @PostMapping
+    @PostMapping("add")
     @RequiresPermissions("role:add")
     @ControllerEndpoint(operation = "新增角色", exceptionMessage = "新增角色失败")
     public ResultResponse addRole(@Valid Role role) {
@@ -51,15 +51,15 @@ public class RoleController extends BaseController {
         return ResultResponse.ok();
     }
 
-    @GetMapping("delete/{roleIds}")
+    @DeleteMapping("delete")
     @RequiresPermissions("role:delete")
     @ControllerEndpoint(operation = "删除角色", exceptionMessage = "删除角色失败")
-    public ResultResponse deleteRoles(@NotBlank(message = "{required}") @PathVariable String roleIds) {
-        this.roleService.deleteRoles(roleIds);
+    public ResultResponse deleteRoles(String ids) {
+        this.roleService.deleteRoles(ids);
         return ResultResponse.ok();
     }
 
-    @PostMapping("update")
+    @PutMapping("update")
     @RequiresPermissions("role:update")
     @ControllerEndpoint(operation = "修改角色", exceptionMessage = "修改角色失败")
     public ResultResponse updateRole(Role role) {

@@ -47,7 +47,7 @@ public class ControllerEndpointAspect extends AspectSupport {
         } catch (Throwable throwable) {
             String exceptionMessage = annotation.exceptionMessage();
             String message = throwable.getMessage();
-            String error = BasicUtil.containChinese(message) ? exceptionMessage + "，" + message : exceptionMessage;
+            String error = StringUtils.isNotBlank(message)&& BasicUtil.containChinese(message) ? exceptionMessage + "，" + message : exceptionMessage;
             throw new HsException(error);
         }
     }

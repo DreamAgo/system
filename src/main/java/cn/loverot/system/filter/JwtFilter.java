@@ -47,7 +47,7 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
 			try {
 				response.setContentType("text/html;charset=utf-8");
 				writer = response.getWriter();
-				writer.write(JSON.toJSONString(ResultResponse.unAuth().message(e.getMessage())));
+				writer.write(JSON.toJSONString(ResultResponse.forbid().message(e.getMessage())));
 			} catch (IOException e1) {
 				writer.write(JSON.toJSONString(ResultResponse.fail().message(e.getMessage())));
 			}
