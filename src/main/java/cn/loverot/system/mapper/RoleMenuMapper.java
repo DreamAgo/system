@@ -10,7 +10,7 @@ public interface RoleMenuMapper extends BaseMapper<RoleMenu> {
     /**
      * 递归删除菜单/按钮
      *
-     * @param menuId menuId
+     * @param menuId id
      */
     void deleteRoleMenus(String menuId);
 }

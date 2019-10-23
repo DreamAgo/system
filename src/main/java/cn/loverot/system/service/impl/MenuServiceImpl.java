@@ -50,7 +50,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
         if (StringUtils.isNotBlank(menu.getMenuName())) {
             queryWrapper.lambda().like(Menu::getMenuName, menu.getMenuName());
         }
-        queryWrapper.lambda().orderByAsc(Menu::getOrderNum);
+        queryWrapper.lambda().orderByAsc(Menu::getSortNum);
         List<Menu> menus = this.baseMapper.selectList(queryWrapper);
         List<MenuTree<Menu>> trees = this.convertMenus(menus);
 
@@ -63,7 +63,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
         if (StringUtils.isNotBlank(menu.getMenuName())) {
             queryWrapper.lambda().like(Menu::getMenuName, menu.getMenuName());
         }
-        queryWrapper.lambda().orderByAsc(Menu::getMenuId).orderByAsc(Menu::getOrderNum);
+        queryWrapper.lambda().orderByAsc(Menu::getId).orderByAsc(Menu::getSortNum);
         return this.baseMapper.selectList(queryWrapper);
     }
 
@@ -79,7 +79,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
     @Override
    @Transactional(rollbackFor = Exception.class)
     public void updateMenu(Menu menu) {
-        menu.setModifyTime(new Date());
+        menu.setUpdateTime(new Date());
         this.setMenu(menu);
         this.baseMapper.updateById(menu);
 
@@ -99,7 +99,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
         List<MenuTree<Menu>> trees = new ArrayList<>();
         menus.forEach(menu -> {
             MenuTree<Menu> tree = new MenuTree<>();
-            tree.setId(String.valueOf(menu.getMenuId()));
+            tree.setId(String.valueOf(menu.getId()));
             tree.setParentId(String.valueOf(menu.getParentId()));
             tree.setTitle(menu.getMenuName());
             tree.setIcon(menu.getIcon());
@@ -128,7 +128,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
         List<Menu> menus = baseMapper.selectList(queryWrapper);
         if (CollectionUtils.isNotEmpty(menus)) {
             List<String> menuIdList = new ArrayList<>();
-            menus.forEach(m -> menuIdList.add(String.valueOf(m.getMenuId())));
+            menus.forEach(m -> menuIdList.add(String.valueOf(m.getId())));
             this.delete(menuIdList);
         }
     }

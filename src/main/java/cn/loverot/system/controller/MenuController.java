@@ -56,11 +56,11 @@ public class MenuController extends BaseController {
         return ResultResponse.ok();
     }
 
-    @GetMapping("delete/{menuIds}")
+    @DeleteMapping("delete")
     @RequiresPermissions("menu:delete")
     @ControllerEndpoint(operation = "删除菜单/按钮", exceptionMessage = "删除菜单/按钮失败")
-    public ResultResponse deleteMenus(@NotBlank(message = "{required}") @PathVariable String menuIds) {
-        this.menuService.deleteMeuns(menuIds);
+    public ResultResponse deleteMenus(@NotBlank(message = "{required}") String ids) {
+        this.menuService.deleteMeuns(ids);
         return ResultResponse.ok();
     }
 

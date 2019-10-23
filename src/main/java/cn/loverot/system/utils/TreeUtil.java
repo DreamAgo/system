@@ -46,8 +46,6 @@ public class TreeUtil {
         root.setHasChild(true);
         root.setChecked(true);
         root.setChilds(topNodes);
-        Map<String, Object> state = new HashMap<>(16);
-        root.setState(state);
         return root;
     }
 
