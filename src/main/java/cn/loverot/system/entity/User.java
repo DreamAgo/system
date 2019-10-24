@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wuwenze.poi.annotation.Excel;
 import com.wuwenze.poi.annotation.ExcelField;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -81,7 +82,6 @@ public class User implements Serializable {
      */
     @TableField("EMAIL")
     @Size(max = 50, message = "{noMoreThan}")
-    @Email(message = "{email}")
     @ExcelField(value = "邮箱")
     private String email;
 
@@ -89,7 +89,6 @@ public class User implements Serializable {
      * 联系电话
      */
     @TableField("MOBILE")
-    @Pattern(regexp= RegexpConstant.MOBILE_REG, message = "{mobile}")
     @ExcelField(value = "联系电话")
     private String mobile;
 
@@ -106,21 +105,26 @@ public class User implements Serializable {
      */
     @TableField("CREATE_TIME")
     @ExcelField(value = "创建时间", writeConverter = TimeConverter.class)
+    @JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
     /**
      * 修改时间
      */
-    @TableField("MODIFY_TIME")
+    @TableField("UPDATE_TIME")
     @ExcelField(value = "修改时间", writeConverter = TimeConverter.class)
-    private Date modifyTime;
+    @JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private Date updateTime;
 
     /**
      * 最近访问时间
      */
     @TableField("LAST_LOGIN_TIME")
     @ExcelField(value = "最近访问时间", writeConverter = TimeConverter.class)
-    @JsonFormat(pattern = "yyyy年MM月dd日 HH时mm分ss秒", timezone = "GMT+8")
+    @JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date lastLoginTime;
 
     /**

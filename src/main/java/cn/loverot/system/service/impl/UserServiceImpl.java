@@ -3,7 +3,6 @@ package cn.loverot.system.service.impl;
 import cn.hutool.crypto.SecureUtil;
 import cn.loverot.common.entity.QueryRequest;
 import cn.loverot.common.entity.ResultResponse;
-import cn.loverot.system.auth.ShiroRealm;
 import cn.loverot.system.constant.CacheConstant;
 import cn.loverot.system.constant.Const;
 import cn.loverot.system.entity.User;
@@ -13,14 +12,12 @@ import cn.loverot.system.service.IUserRoleService;
 import cn.loverot.system.service.IUserService;
 import cn.loverot.system.utils.PasswordUtil;
 import cn.loverot.system.utils.SortUtil;
-import cn.loverot.system.utils.SystemUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -52,7 +49,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public IPage<User> findUserDetail(User user, QueryRequest request) {
         Page<User> page = new Page<>(request.getPageNum(), request.getPageSize());
-        SortUtil.handlePageSort(request, page, "userId", Const.ORDER_ASC, false);
+        SortUtil.handlePageSort(request, page, "id", Const.ORDER_ASC, false);
         return this.baseMapper.findUserDetailPage(page, user);
     }
 
@@ -105,7 +102,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 更新用户
         user.setPassword(null);
         user.setUsername(null);
-        user.setModifyTime(new Date());
+        user.setUpdateTime(new Date());
         updateById(user);
         // 更新关联角色
         this.userRoleService.remove(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, user.getId()));
@@ -121,7 +118,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public void resetPassword(String[] usernames) {
         Arrays.stream(usernames).forEach(username -> {
             User user = new User();
-            user.setPassword(SecureUtil.sha1(User.DEFAULT_PASSWORD));
+            String salt = PasswordUtil.RandSalt();
+            user.setSalt(salt);
+            user.setPassword(PasswordUtil.encrypt(username, User.DEFAULT_PASSWORD, salt));
             this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
         });
     }
@@ -158,7 +157,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         String salt = PasswordUtil.RandSalt();
         user.setPassword(PasswordUtil.encrypt(username, password, salt));
         user.setSalt(salt);
-        user.setModifyTime(new Date());
+        user.setUpdateTime(new Date());
         this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
     }
 
@@ -168,7 +167,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public void updateAvatar(String username, String avatar) {
         User user = new User();
         user.setAvatar(avatar);
-        user.setModifyTime(new Date());
+        user.setUpdateTime(new Date());
         this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
     }
 
@@ -179,7 +178,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         User user = new User();
         user.setTheme(theme);
         user.setIsTab(isTab);
-        user.setModifyTime(new Date());
+        user.setUpdateTime(new Date());
         this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
     }
 

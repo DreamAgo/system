@@ -59,7 +59,7 @@ public class UserController extends BaseController {
         return ResultResponse.ok().data(dataTable);
     }
 
-    @PostMapping
+    @PostMapping("add")
     @RequiresPermissions("user:add")
     @ControllerEndpoint(operation = "新增用户", exceptionMessage = "新增用户失败")
     public ResultResponse addUser(@Valid User user) {
@@ -67,16 +67,16 @@ public class UserController extends BaseController {
         return ResultResponse.ok();
     }
 
-    @GetMapping("delete/{userIds}")
+    @DeleteMapping("delete")
     @RequiresPermissions("user:delete")
     @ControllerEndpoint(operation = "删除用户", exceptionMessage = "删除用户失败")
-    public ResultResponse deleteUsers(@NotBlank(message = "{required}") @PathVariable String userIds) {
-        String[] ids = userIds.split(StringPool.COMMA);
-        this.userService.deleteUsers(ids);
+    public ResultResponse deleteUsers(@NotBlank(message = "{required}")  String ids) {
+        String[] userIds = ids.split(StringPool.COMMA);
+        this.userService.deleteUsers(userIds);
         return ResultResponse.ok();
     }
 
-    @PostMapping("update")
+    @PutMapping("update")
     @RequiresPermissions("user:update")
     @ControllerEndpoint(operation = "修改用户", exceptionMessage = "修改用户失败")
     public ResultResponse updateUser(@Valid User user) {
@@ -90,10 +90,10 @@ public class UserController extends BaseController {
         return ResultResponse.ok();
     }
 
-    @PostMapping("password/reset/{usernames}")
+    @PostMapping("password/reset")
     @RequiresPermissions("user:password:reset")
     @ControllerEndpoint(exceptionMessage = "重置用户密码失败")
-    public ResultResponse resetPassword(@NotBlank(message = "{required}") @PathVariable String usernames) {
+    public ResultResponse resetPassword(@NotBlank(message = "{required}") String usernames) {
         String[] usernameArr = usernames.split(StringPool.COMMA);
         this.userService.resetPassword(usernameArr);
         return ResultResponse.ok();

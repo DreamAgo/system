@@ -56,7 +56,16 @@ public class ShiroRealm extends AuthorizingRealm {
     public boolean supports(AuthenticationToken token) {
         return token instanceof JwtToken;
     }
-
+    @Override
+    public  boolean isPermitted(PrincipalCollection principals, String permission){
+        User user = (User)principals.getPrimaryPrincipal();
+        return "root".equals(user.getUsername())||super.isPermitted(principals,permission);
+    }
+    @Override
+    public boolean hasRole(PrincipalCollection principals, String roleIdentifier) {
+        User user = (User)principals.getPrimaryPrincipal();
+        return "root".equals(user.getUsername())||super.hasRole(principals,roleIdentifier);
+    }
     /**
      * 授权模块，获取用户角色和权限
      *

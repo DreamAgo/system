@@ -45,10 +45,10 @@ public class MenuController extends BaseController {
     @ControllerEndpoint(exceptionMessage = "获取菜单树失败")
     public ResultResponse getMenuTree(Menu menu) {
         MenuTree<Menu> menus = this.menuService.findMenus(menu);
-        return ResultResponse.ok().data(menus.getChilds());
+        return ResultResponse.ok().data(menus.getChildren());
     }
 
-    @PostMapping
+    @PostMapping("add")
     @RequiresPermissions("menu:add")
     @ControllerEndpoint(operation = "新增菜单/按钮", exceptionMessage = "新增菜单/按钮失败")
     public ResultResponse addMenu(@Valid Menu menu) {
@@ -64,7 +64,7 @@ public class MenuController extends BaseController {
         return ResultResponse.ok();
     }
 
-    @PostMapping("update")
+    @PutMapping("update")
     @RequiresPermissions("menu:update")
     @ControllerEndpoint(operation = "修改菜单/按钮", exceptionMessage = "修改菜单/按钮失败")
     public ResultResponse updateMenu(@Valid Menu menu) {

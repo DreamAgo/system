@@ -4,9 +4,7 @@ package cn.loverot.system.utils;
 import cn.loverot.system.entity.MenuTree;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author huise
@@ -31,9 +29,8 @@ public class TreeUtil {
             for (MenuTree<T> parent : nodes) {
                 String id = parent.getId();
                 if (id != null && id.equals(pid)) {
-                    parent.getChilds().add(children);
+                    parent.getChildren().add(children);
                     children.setHasParent(true);
-                    parent.setHasChild(true);
                     return;
                 }
             }
@@ -43,9 +40,8 @@ public class TreeUtil {
         root.setId("0");
         root.setParentId("");
         root.setHasParent(false);
-        root.setHasChild(true);
         root.setChecked(true);
-        root.setChilds(topNodes);
+        root.setChildren(topNodes);
         return root;
     }
 
@@ -64,9 +60,8 @@ public class TreeUtil {
             nodes.forEach(parent -> {
                 String id = parent.getId();
                 if (id != null && id.equals(pid)) {
-                    parent.getChilds().add(children);
+                    parent.getChildren().add(children);
                     children.setHasParent(true);
-                    parent.setHasChild(true);
                 }
             });
         });
