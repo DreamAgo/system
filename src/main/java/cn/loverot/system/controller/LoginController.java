@@ -33,10 +33,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -83,6 +80,7 @@ public class LoginController extends BaseController {
         loginLog.setUsername(username);
         loginLog.setSystemBrowserInfo();
         this.loginLogService.saveLoginLog(loginLog);
+        userService.updateLoginTime(username);
         return  ResultResponse.ok().put("token",token);
     }
 
